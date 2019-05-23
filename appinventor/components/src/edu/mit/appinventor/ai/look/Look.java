@@ -62,10 +62,10 @@ import java.util.Map;
         category = ComponentCategory.EXTENSION,
         description = "Component that classifies images. You must provide a WebViewer component " +
             "in the Look component's WebViewer property in order for classificatino to work.",
-        iconName = "aiwebres/glasses.png",
+        iconName = "aiwebres/look.png",
         nonVisible = true)
 @SimpleObject(external = true)
-@UsesAssets(fileNames = "look.html, look.js, group1-shard1of1, web_model.pb, weights_manifest.json, scavenger_classes.js, tfjs-0.12.4.js")
+@UsesAssets(fileNames = "look.html, look.js, model.json, group1-shard1of4, group1-shard2of4, group1-shard3of4, group1-shard4of4, imagenet_classes.js, tfjs-1.1.2.js")
 @UsesPermissions(permissionNames = "android.permission.INTERNET, android.permission.CAMERA")
 public final class Look extends AndroidNonvisibleComponent implements Component {
   private static final String LOG_TAG = Look.class.getSimpleName();
@@ -76,7 +76,7 @@ public final class Look extends AndroidNonvisibleComponent implements Component 
   private static final String ERROR_WEBVIEWER_NOT_SET =
       "You must specify a WebViewer using the WebViewer designer property before you can call %1s";
 
-  private static final String MODEL_PREFIX = "https://emojiscavengerhunt.withgoogle.com/model/";
+  private static final String MODEL_PREFIX = "https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/";
 
   // other error codes are defined in look.js
   private static final int ERROR_CLASSIFICATION_NOT_SUPPORTED = -1;

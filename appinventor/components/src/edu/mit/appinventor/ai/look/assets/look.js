@@ -1,10 +1,8 @@
-// -*- mode: javascript; js-indent-level: 2; -*-
 "use strict";
 
 console.log("Look: Using TensorFlow.js version " + tf.version.tfjs);
 
-const MOBILENET_MODEL_PATH = "https://emojiscavengerhunt.withgoogle.com/model/web_model.pb";
-const WEIGHTS_MANIFEST_FILE_URL = "https://emojiscavengerhunt.withgoogle.com/model/weights_manifest.json";
+const MOBILENET_MODEL_PATH = "https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json";
 
 const IMAGE_SIZE = 224;
 const TOPK_PREDICTIONS = 10;
@@ -20,7 +18,7 @@ const ERROR_INVALID_INPUT_MODE = -6;
 let mobilenet;
 const mobilenetDemo = async () => {
   try {
-    mobilenet = await tf.loadFrozenModel(MOBILENET_MODEL_PATH, WEIGHTS_MANIFEST_FILE_URL);
+    mobilenet = await tf.loadGraphModel(MOBILENET_MODEL_PATH);
     const zeros = tf.zeros([1, IMAGE_SIZE, IMAGE_SIZE, 3]);
     mobilenet.predict(zeros).dispose();
     zeros.dispose();
@@ -35,11 +33,12 @@ const mobilenetDemo = async () => {
 async function predict(pixels) {
   try {
     const logits = tf.tidy(() => {
-      const img = tf.image.resizeBilinear(tf.fromPixels(pixels).toFloat(), [IMAGE_SIZE, IMAGE_SIZE]);
+      const img = tf.image.resizeBilinear(tf.browser.fromPixels(pixels).toFloat(), [IMAGE_SIZE, IMAGE_SIZE]);
       const offset = tf.scalar(127.5);
       const normalized = img.sub(offset).div(offset);
-      const batched = normalized.reshape([1, IMAGE_SIZE, IMAGE_SIZE, 3]);
-      return mobilenet.predict(batched);
+      const batched = normalized.reshape([-1, IMAGE_SIZE, IMAGE_SIZE, 3]);
+      const logits1001 = mobilenet.predict(batched);
+      return logits1001.slice([0, 1], [-1, 1000]);
     });
     const classes = await getTopKClasses(logits, TOPK_PREDICTIONS);
     logits.dispose();
@@ -56,7 +55,9 @@ async function predict(pixels) {
 }
 
 async function getTopKClasses(logits, topK) {
-  const values = await logits.data();
+  const softmax = logits.softmax();
+  const values = await softmax.data();
+  softmax.dispose();
   const valuesAndIndices = [];
   for (let i = 0; i < values.length; i++) {
     valuesAndIndices.push({value: values[i], index: i});
@@ -73,7 +74,7 @@ async function getTopKClasses(logits, topK) {
   const topClassesAndProbs = [];
   for (let i = 0; i < topkIndices.length; i++) {
     topClassesAndProbs.push({
-      className: SCAVENGER_CLASSES[topkIndices[i]],
+      className: IMAGENET_CLASSES[topkIndices[i]],
       probability: topkValues[i]
     });
   }
@@ -104,7 +105,7 @@ function startVideo() {
   if (isVideoMode) {
     navigator.mediaDevices.getUserMedia({video: {facingMode: frontFacing ? "user" : "environment"}, audio: false})
     .then(stream => (video.srcObject = stream))
-    .catch(e => log(e));
+    .catch(e => console.log(e));
     video.style.display = "block";
   }
 }
