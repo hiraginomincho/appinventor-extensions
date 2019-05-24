@@ -24,12 +24,28 @@ class SDK26Helper {
   }
 
   static void askForPermission(final SpeechCommands speechcommands, final Runnable next) {
-    speechcommands.getForm().askPermission(Manifest.permission.CAMERA, new PermissionResultHandler() {
+    speechcommands.getForm().askPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS, new PermissionResultHandler() {
       @Override
       public void HandlePermissionResponse(String permission, boolean granted) {
+        System.out.println(permission);
         if (granted) {
+          System.out.println("granted");
           next.run();
         } else {
+            System.out.println("not granted");
+          speechcommands.getForm().PermissionDenied(speechcommands, "WebViewer", permission);
+        }
+      }
+    });
+    speechcommands.getForm().askPermission(Manifest.permission.RECORD_AUDIO, new PermissionResultHandler() {
+      @Override
+      public void HandlePermissionResponse(String permission, boolean granted) {
+        System.out.println(permission);
+        if (granted) {
+          System.out.println("granted");
+          next.run();
+        } else {
+          System.out.println("granted");
           speechcommands.getForm().PermissionDenied(speechcommands, "WebViewer", permission);
         }
       }

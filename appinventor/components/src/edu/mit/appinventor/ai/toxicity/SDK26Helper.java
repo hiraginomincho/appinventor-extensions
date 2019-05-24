@@ -24,15 +24,15 @@ class SDK26Helper {
   }
 
   static void askForPermission(final Toxicity toxicity, final Runnable next) {
-    toxicity.getForm().askPermission(Manifest.permission.CAMERA, new PermissionResultHandler() {
-      @Override
-      public void HandlePermissionResponse(String permission, boolean granted) {
-        if (granted) {
-          next.run();
-        } else {
-          toxicity.getForm().PermissionDenied(toxicity, "WebViewer", permission);
+      toxicity.getForm().askPermission(Manifest.permission.CAMERA, new PermissionResultHandler() {
+        @Override
+        public void HandlePermissionResponse(String permission, boolean granted) {
+          if (granted) {
+            next.run();
+          } else {
+            toxicity.getForm().PermissionDenied(toxicity, "WebViewer", permission);
+          }
         }
-      }
-    });
+      });
   }
 }

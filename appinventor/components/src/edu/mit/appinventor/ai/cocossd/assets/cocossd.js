@@ -2,10 +2,7 @@
 
 console.log("COCO-SSD: Using TensorFlow.js version " + tf.version.tfjs);
 
-const COCO_SSD_MODEL_PATH = "https://storage.googleapis.com/tfjs-models/savedmodel/ssdlite_mobilenet_v2/tensorflowjs_model.pb";
-const COCO_SSD_WEIGHT_PATH = "https://storage.googleapis.com/tfjs-models/savedmodel/ssdlite_mobilenet_v2/weights_manifest.json";
-// const COCO_SSD_MODEL_PATH = "https://storage.googleapis.com/tfjs-models/savedmodel/ssd_mobilenet_v2/tensorflowjs_model.pb";
-// const COCO_SSD_WEIGHT_PATH = "https://storage.googleapis.com/tfjs-models/savedmodel/ssd_mobilenet_v2/weights_manifest.json";
+const COCO_SSD_MODEL_PATH = "https://storage.googleapis.com/tfjs-models/savedmodel/ssdlite_mobilenet_v2/model.json";
 
 var scale;
 
@@ -14,7 +11,7 @@ var MAX_NUM_BOXES = 20;
 let cocossd;
 const cocossdDemo = async () => {
   try {
-    cocossd = await tf.loadFrozenModel(COCO_SSD_MODEL_PATH, COCO_SSD_WEIGHT_PATH);
+    cocossd = await tf.loadGraphModel(COCO_SSD_MODEL_PATH);
     const result = await cocossd.executeAsync(tf.zeros([1, 300, 300, 3]));
     result.map(async (t) => await t.data());
     result.map(async (t) => t.dispose());
@@ -28,7 +25,7 @@ const cocossdDemo = async () => {
 async function detect(pixels) {
   try {
     const batched = tf.tidy(() => {
-      return tf.fromPixels(pixels).expandDims(0);
+      return tf.browser.fromPixels(pixels).expandDims(0);
     });
     const height = batched.shape[1];
     const width = batched.shape[2];

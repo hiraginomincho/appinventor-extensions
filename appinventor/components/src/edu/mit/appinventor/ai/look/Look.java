@@ -61,7 +61,7 @@ import java.util.Map;
 @DesignerComponent(version = 20181124,
         category = ComponentCategory.EXTENSION,
         description = "Component that classifies images. You must provide a WebViewer component " +
-            "in the Look component's WebViewer property in order for classificatino to work.",
+            "in the Look component's WebViewer property in order for classification to work.",
         iconName = "aiwebres/look.png",
         nonVisible = true)
 @SimpleObject(external = true)
@@ -88,7 +88,7 @@ public final class Look extends AndroidNonvisibleComponent implements Component 
   private static final int ERROR_WEBVIEWER_REQUIRED = -7;
 
   private WebView webview = null;
-  private String inputMode = MODE_VIDEO;
+  private String inputMode = MODE_IMAGE;
 
   public Look(final Form form) {
     super(form);

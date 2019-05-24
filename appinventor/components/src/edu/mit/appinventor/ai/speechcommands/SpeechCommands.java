@@ -61,28 +61,24 @@ import java.util.Map;
 import static android.net.Uri.encode;
 
 /**
- * Component that recognizes text.
+ * Component that recognizes speech commands.
  */
 
 @DesignerComponent(version = 20181124,
         category = ComponentCategory.EXTENSION,
-        description = "Component that recognizes text. You must provide a WebViewer component " +
-            "in the SpeechCommands component's WebViewer property in order for classificatino to work.",
-        iconName = "aiwebres/glasses.png",
+        description = "Component that recognizes speech commands. You must provide a WebViewer component " +
+            "in the SpeechCommands component's WebViewer property in order for classification to work.",
+        iconName = "aiwebres/speechcommands.png",
         nonVisible = true)
 @SimpleObject(external = true)
-@UsesPermissions(permissionNames = "android.permission.INTERNET, android.permission.CAMERA")
+@UsesPermissions(permissionNames = "android.permission.INTERNET, android.permission.MODIFY_AUDIO_SETTINGS, android.permission.RECORD_AUDIO")
 public final class SpeechCommands extends AndroidNonvisibleComponent implements Component {
   private static final String LOG_TAG = SpeechCommands.class.getSimpleName();
   private static final String MODEL_DIRECTORY = "/sdcard/AppInventor/assets/SpeechCommands/";
-  private static final int IMAGE_WIDTH = 500;
-  private static final int IMAGE_QUALITY = 100;
-  private static final String MODE_VIDEO = "Video";
-  private static final String MODE_IMAGE = "Image";
   private static final String ERROR_WEBVIEWER_NOT_SET =
       "You must specify a WebViewer using the WebViewer designer property before you can call %1s";
 
-  // other error codes are defined in SpeechCommands.js
+  // other error codes are defined in speechcommands.js
   private static final int ERROR_CLASSIFICATION_NOT_SUPPORTED = -1;
   private static final int ERROR_CLASSIFICATION_FAILED = -2;
   private static final int ERROR_LOAD_MODEL_FAILED_BAD_FILE_FORMAT = -3;
@@ -94,7 +90,6 @@ public final class SpeechCommands extends AndroidNonvisibleComponent implements 
   private static final int ERROR_WEBVIEWER_REQUIRED = -9;
 
   private WebView webview = null;
-  private String inputMode = MODE_VIDEO;
 
   public SpeechCommands(final Form form) {
     super(form);
@@ -117,8 +112,8 @@ public final class SpeechCommands extends AndroidNonvisibleComponent implements 
         Log.d(LOG_TAG, "onPermissionRequest called");
         String[] requestedResources = request.getResources();
         for (String r : requestedResources) {
-          if (r.equals(PermissionRequest.RESOURCE_VIDEO_CAPTURE)) {
-            request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+          if (r.equals(PermissionRequest.RESOURCE_AUDIO_CAPTURE)) {
+            request.grant(new String[]{PermissionRequest.RESOURCE_AUDIO_CAPTURE});
           }
         }
       }
@@ -143,7 +138,6 @@ public final class SpeechCommands extends AndroidNonvisibleComponent implements 
             configureWebView((WebView) webviewer.getView());
             webview.requestLayout();
             Log.d(LOG_TAG, "isHardwareAccelerated? " + webview.isHardwareAccelerated());
-            // webview.loadUrl(form.getAssetPathForExtension(OCR.this, "cocossd.html"));
             webview.loadUrl("https://hiraginomincho.github.io/speech-commands/");
           }
         }
@@ -172,7 +166,7 @@ public final class SpeechCommands extends AndroidNonvisibleComponent implements 
     EventDispatcher.dispatchEvent(this, "ClassifierReady");
   }
 
-  @SimpleEvent(description = "temp")
+  @SimpleEvent(description = "")
   public void GotClassification(YailList result) {
     EventDispatcher.dispatchEvent(this, "GotClassification", result);
   }

@@ -69,11 +69,11 @@ import static android.net.Uri.encode;
 @DesignerComponent(version = 20181124,
         category = ComponentCategory.EXTENSION,
         description = "Component that detects objects in images. You must provide a WebViewer component " +
-            "in the COCOSSD component's WebViewer property in order for classificatino to work.",
-        iconName = "aiwebres/glasses.png",
+            "in the COCOSSD component's WebViewer property in order for classification to work.",
+        iconName = "aiwebres/cocossd.png",
         nonVisible = true)
 @SimpleObject(external = true)
-@UsesAssets(fileNames = "cocossd.html, cocossd.js, group1-shard1of5, group1-shard2of5, group1-shard3of5, group1-shard4of5, group1-shard5of5, coco_classes.js, tensorflowjs_model.pb, weights_manifest.json, tfjs-0.14.0.js")
+@UsesAssets(fileNames = "cocossd.html, cocossd.js, group1-shard1of5, model.json, group1-shard2of5, group1-shard3of5, group1-shard4of5, group1-shard5of5, coco_classes.js, tfjs-1.1.2.js")
 @UsesPermissions(permissionNames = "android.permission.INTERNET, android.permission.CAMERA")
 public final class COCOSSD extends AndroidNonvisibleComponent implements Component {
   private static final String LOG_TAG = COCOSSD.class.getSimpleName();
@@ -99,7 +99,7 @@ public final class COCOSSD extends AndroidNonvisibleComponent implements Compone
   private static final int ERROR_WEBVIEWER_REQUIRED = -9;
 
   private WebView webview = null;
-  private String inputMode = MODE_VIDEO;
+  private String inputMode = MODE_IMAGE;
 
   public COCOSSD(final Form form) {
     super(form);
@@ -196,6 +196,32 @@ public final class COCOSSD extends AndroidNonvisibleComponent implements Compone
     }
   }
 
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_CHOICES,
+      editorArgs = {MODE_VIDEO, MODE_IMAGE})
+  @SimpleProperty
+  public void InputMode(String mode) {
+    if (webview == null) {
+      inputMode = mode;
+      return;
+    }
+    if (MODE_VIDEO.equalsIgnoreCase(mode)) {
+      webview.evaluateJavascript("setInputMode(\"video\");", null);
+      inputMode = MODE_VIDEO;
+    } else if (MODE_IMAGE.equalsIgnoreCase(mode)) {
+      webview.evaluateJavascript("setInputMode(\"image\");", null);
+      inputMode = MODE_IMAGE;
+    } else {
+      form.dispatchErrorOccurredEvent(this, "InputMode", ErrorMessages.ERROR_EXTENSION_ERROR, ERROR_INVALID_INPUT_MODE, LOG_TAG, "Invalid input mode " + mode);
+    }
+  }
+
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+      description = "Gets or sets the input mode for classification. Valid values are \"Video\" " +
+          "(the default) and \"Image\".")
+  public String InputMode() {
+    return inputMode;
+  }
+
   @SimpleFunction(description = "Performs classification on the image at the given path and triggers the GotClassification event when classification is finished successfully.")
   public void DetectImageData(final String image) {
     Log.d(LOG_TAG, "Entered Classify");
@@ -234,6 +260,12 @@ public final class COCOSSD extends AndroidNonvisibleComponent implements Compone
   public void DetectVideoData() {
     assertWebView("DetectVideoData");
     webview.evaluateJavascript("detectVideoData();", null);
+  }
+
+  @SimpleFunction(description = "Clears all rectangles.")
+  public void Clear() {
+    assertWebView("Clear");
+    webview.evaluateJavascript("clear();", null);
   }
 
   @SimpleFunction(description = "Sets the input mode to image if inputMode is \"image\" or video if inputMode is \"video\".")

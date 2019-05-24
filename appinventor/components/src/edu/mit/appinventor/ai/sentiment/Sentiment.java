@@ -67,18 +67,14 @@ import static android.net.Uri.encode;
 @DesignerComponent(version = 20181124,
         category = ComponentCategory.EXTENSION,
         description = "Component that recognizes text. You must provide a WebViewer component " +
-            "in the Sentiment component's WebViewer property in order for classificatino to work.",
-        iconName = "aiwebres/glasses.png",
+            "in the Sentiment component's WebViewer property in order for classification to work.",
+        iconName = "aiwebres/sentiment.png",
         nonVisible = true)
 @SimpleObject(external = true)
-@UsesPermissions(permissionNames = "android.permission.INTERNET, android.permission.CAMERA")
+@UsesPermissions(permissionNames = "android.permission.INTERNET")
 public final class Sentiment extends AndroidNonvisibleComponent implements Component {
   private static final String LOG_TAG = Sentiment.class.getSimpleName();
   private static final String MODEL_DIRECTORY = "/sdcard/AppInventor/assets/Sentiment/";
-  private static final int IMAGE_WIDTH = 500;
-  private static final int IMAGE_QUALITY = 100;
-  private static final String MODE_VIDEO = "Video";
-  private static final String MODE_IMAGE = "Image";
   private static final String ERROR_WEBVIEWER_NOT_SET =
       "You must specify a WebViewer using the WebViewer designer property before you can call %1s";
 
@@ -94,7 +90,6 @@ public final class Sentiment extends AndroidNonvisibleComponent implements Compo
   private static final int ERROR_WEBVIEWER_REQUIRED = -9;
 
   private WebView webview = null;
-  private String inputMode = MODE_VIDEO;
 
   public Sentiment(final Form form) {
     super(form);
@@ -166,7 +161,7 @@ public final class Sentiment extends AndroidNonvisibleComponent implements Compo
   }
 
   @SimpleEvent(description = "temp")
-  public void GotClassification(YailList result) {
+  public void GotClassification(final String result) {
     EventDispatcher.dispatchEvent(this, "GotClassification", result);
   }
 
@@ -204,25 +199,13 @@ public final class Sentiment extends AndroidNonvisibleComponent implements Compo
     @JavascriptInterface
     public void reportResult(final String result) {
       Log.d(LOG_TAG, "Entered reportResult: " + result);
-      try {
-        Log.d(LOG_TAG, "Entered try of reportResult");
-        JSONArray list = new JSONArray(result);
-        YailList intermediateList = YailList.makeList(JsonUtil.getListFromJsonArray(list));
-        final List resultList = new ArrayList();
-        for (int i = 0; i < intermediateList.size(); i++) {
-          resultList.add(YailList.makeList((List) intermediateList.getObject(i)));
+      Log.d(LOG_TAG, "Entered try of reportResult");
+      form.runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+          GotClassification(result);
         }
-        form.runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            GotClassification(YailList.makeList(resultList));
-          }
-        });
-      } catch (JSONException e) {
-        Log.d(LOG_TAG, "Entered catch of reportResult");
-        e.printStackTrace();
-        Error(ERROR_CLASSIFICATION_FAILED);
-      }
+      });
     }
   }
 }

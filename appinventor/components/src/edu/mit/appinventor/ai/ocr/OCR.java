@@ -67,8 +67,8 @@ import static android.net.Uri.encode;
 @DesignerComponent(version = 20181124,
         category = ComponentCategory.EXTENSION,
         description = "Component that recognizes text. You must provide a WebViewer component " +
-            "in the OCR component's WebViewer property in order for classificatino to work.",
-        iconName = "aiwebres/glasses.png",
+            "in the OCR component's WebViewer property in order for classification to work.",
+        iconName = "aiwebres/ocr.png",
         nonVisible = true)
 @SimpleObject(external = true)
 @UsesPermissions(permissionNames = "android.permission.INTERNET, android.permission.CAMERA")
@@ -94,7 +94,7 @@ public final class OCR extends AndroidNonvisibleComponent implements Component {
   private static final int ERROR_WEBVIEWER_REQUIRED = -9;
 
   private WebView webview = null;
-  private String inputMode = MODE_VIDEO;
+  private String inputMode = MODE_IMAGE;
 
   public OCR(final Form form) {
     super(form);
@@ -143,8 +143,7 @@ public final class OCR extends AndroidNonvisibleComponent implements Component {
             configureWebView((WebView) webviewer.getView());
             webview.requestLayout();
             Log.d(LOG_TAG, "isHardwareAccelerated? " + webview.isHardwareAccelerated());
-            // webview.loadUrl(form.getAssetPathForExtension(OCR.this, "cocossd.html"));
-            webview.loadUrl("https://kelseyc18.github.io/appinventor-ocr/");
+            webview.loadUrl("https://hiraginomincho.github.io/ocr/");
           }
         }
       };
@@ -153,6 +152,32 @@ public final class OCR extends AndroidNonvisibleComponent implements Component {
     } else {
       next.run();
     }
+  }
+
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_CHOICES,
+      editorArgs = {MODE_VIDEO, MODE_IMAGE})
+  @SimpleProperty
+  public void InputMode(String mode) {
+    if (webview == null) {
+      inputMode = mode;
+      return;
+    }
+    if (MODE_VIDEO.equalsIgnoreCase(mode)) {
+      webview.evaluateJavascript("setInputMode(\"video\");", null);
+      inputMode = MODE_VIDEO;
+    } else if (MODE_IMAGE.equalsIgnoreCase(mode)) {
+      webview.evaluateJavascript("setInputMode(\"image\");", null);
+      inputMode = MODE_IMAGE;
+    } else {
+      form.dispatchErrorOccurredEvent(this, "InputMode", ErrorMessages.ERROR_EXTENSION_ERROR, ERROR_INVALID_INPUT_MODE, LOG_TAG, "Invalid input mode " + mode);
+    }
+  }
+
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+      description = "Gets or sets the input mode for classification. Valid values are \"Video\" " +
+          "(the default) and \"Image\".")
+  public String InputMode() {
+    return inputMode;
   }
 
   @SimpleFunction(description = "Performs classification on the image at the given path and triggers the GotClassification event when classification is finished successfully.")

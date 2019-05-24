@@ -67,18 +67,14 @@ import static android.net.Uri.encode;
 @DesignerComponent(version = 20181124,
         category = ComponentCategory.EXTENSION,
         description = "Component that recognizes text. You must provide a WebViewer component " +
-            "in the Toxicity component's WebViewer property in order for classificatino to work.",
-        iconName = "aiwebres/glasses.png",
+            "in the Toxicity component's WebViewer property in order for classification to work.",
+        iconName = "aiwebres/toxicity.png",
         nonVisible = true)
 @SimpleObject(external = true)
-@UsesPermissions(permissionNames = "android.permission.INTERNET, android.permission.CAMERA")
+@UsesPermissions(permissionNames = "android.permission.INTERNET")
 public final class Toxicity extends AndroidNonvisibleComponent implements Component {
   private static final String LOG_TAG = Toxicity.class.getSimpleName();
   private static final String MODEL_DIRECTORY = "/sdcard/AppInventor/assets/Toxicity/";
-  private static final int IMAGE_WIDTH = 500;
-  private static final int IMAGE_QUALITY = 100;
-  private static final String MODE_VIDEO = "Video";
-  private static final String MODE_IMAGE = "Image";
   private static final String ERROR_WEBVIEWER_NOT_SET =
       "You must specify a WebViewer using the WebViewer designer property before you can call %1s";
 
@@ -94,7 +90,6 @@ public final class Toxicity extends AndroidNonvisibleComponent implements Compon
   private static final int ERROR_WEBVIEWER_REQUIRED = -9;
 
   private WebView webview = null;
-  private String inputMode = MODE_VIDEO;
 
   public Toxicity(final Form form) {
     super(form);
@@ -165,7 +160,7 @@ public final class Toxicity extends AndroidNonvisibleComponent implements Compon
     EventDispatcher.dispatchEvent(this, "ClassifierReady");
   }
 
-  @SimpleEvent(description = "temp")
+  @SimpleEvent(description = "")
   public void GotClassification(YailList result) {
     EventDispatcher.dispatchEvent(this, "GotClassification", result);
   }

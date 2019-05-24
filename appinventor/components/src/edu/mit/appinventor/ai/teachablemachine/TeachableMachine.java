@@ -70,7 +70,7 @@ import static android.net.Uri.encode;
 @DesignerComponent(version = 20181124,
         category = ComponentCategory.EXTENSION,
         description = "Component for teaching a machine to recognize different images. You must provide a WebViewer component " +
-            "in the TeachableMachine component's WebViewer property in order for classificatino to work.",
+            "in the TeachableMachine component's WebViewer property in order for classification to work.",
         iconName = "aiwebres/teachablemachine.png",
         nonVisible = true)
 @SimpleObject(external = true)
